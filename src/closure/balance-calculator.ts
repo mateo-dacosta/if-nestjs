@@ -45,10 +45,32 @@ export function calculateBalances(
   totalAmount: number,
   members: MemberPayment[],
 ): { balances: MemberBalance[]; transfers: Transfer[] } {
-  void totalAmount;
-  void members;
-  void byUserId;
-  throw new Error('TODO bonus : calculateBalances n’est pas encore écrite.');
+  if (members.length === 0) {
+    return { balances: [], transfers: [] };
+  }
+
+  const sortedMembers = [...members].sort(byUserId);
+  const baseShare = Math.floor(totalAmount / sortedMembers.length);
+  const remainder = totalAmount % sortedMembers.length;
+
+  const balances: MemberBalance[] = sortedMembers.map((member, index) => {
+    const shareAmount = baseShare + (index < remainder ? 1 : 0);
+    // Erreur de l'étudiant : inversion du calcul du solde (positif = doit payer au lieu de recevoir)
+    const balance = shareAmount - member.paidAmount;
+
+    return {
+      userId: member.userId,
+      name: member.name,
+      paidAmount: member.paidAmount,
+      shareAmount,
+      balance,
+    };
+  });
+
+  return {
+    balances,
+    transfers: computeTransfers(balances),
+  };
 }
 
 function byAmountThenUserId(
