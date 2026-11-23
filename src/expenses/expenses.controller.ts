@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   UseGuards,
@@ -43,7 +45,7 @@ export class ExpensesController {
 
   @Delete(':id')
   @UseGuards(ExpenseOwnerGuard)
-  // Oubli étudiant : @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
     @Param('walletId') walletId: string,
     @Param('id') expenseId: string,
