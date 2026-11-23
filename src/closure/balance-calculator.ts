@@ -55,8 +55,7 @@ export function calculateBalances(
 
   const balances: MemberBalance[] = sortedMembers.map((member, index) => {
     const shareAmount = baseShare + (index < remainder ? 1 : 0);
-    // Erreur de l'étudiant : inversion du calcul du solde (positif = doit payer au lieu de recevoir)
-    const balance = shareAmount - member.paidAmount;
+    const balance = member.paidAmount - shareAmount;
 
     return {
       userId: member.userId,
