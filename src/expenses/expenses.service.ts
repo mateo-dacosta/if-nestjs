@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   assertMemberOfWallet,
+  assertWalletOpen,
   expenseSelect,
+  isMemberOfWallet,
   toExpenseItem,
 } from './expenses.helpers.js';
+import type { CreateExpenseDto } from './dto/create-expense.dto.js';
 
 @Injectable()
 export class ExpensesService {
@@ -28,6 +31,37 @@ export class ExpensesService {
       items: expenses.map(toExpenseItem),
       totalAmount: aggregate._sum.amount ?? 0,
     };
+  }
+
+  async create(walletId: string, userId: string, dto: CreateExpenseDto) {
+    const wallet = await assertMemberOfWallet(this.prisma, walletId, userId);
+    assertWalletOpen(wallet);
+
+    const paidById = dto.paidById ?? userId;
+    if (paidById !== userId) {
+      const isMember = await isMemberOfWallet(this.prisma, walletId, paidById);
+      if (!isMember) {
+        throw new ForbiddenException(
+          'Le dépenseur doit être membre du porte-monnaie.',
+        );
+      }
+    }
+
+    const expense = await this.prisma.expense.create({
+      data: {
+        walletId,
+        title: dto.title,
+        amount: dto.amount,
+        date: new Date(dto.date),
+        paidById,
+        createdById: userId,
+      },
+      select: expenseSelect,
+    });
+
+    // Oubli étudiant : await this.prisma.wallet.update(...)
+
+    return toExpenseItem(expense);
   }
 
   // TODO étape 2 : écrivez  async create(walletId: string, userId: string, dto: CreateExpenseDto)

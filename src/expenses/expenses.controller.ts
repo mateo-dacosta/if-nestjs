@@ -1,9 +1,18 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/auth.guard.js';
 import { ApiJwtAuth } from '../common/swagger/api-docs.decorators.js';
 import { ExpensesService } from './expenses.service.js';
 import type { AuthenticatedRequest } from '../auth/authenticated-request.js';
+import { CreateExpenseDto } from './dto/create-expense.dto.js';
 
 // Toutes les routes de ce contrôleur commencent par /wallets/:walletId/expenses
 // et exigent un jeton JWT (JwtAuthGuard) : c'est déjà configuré.
@@ -20,6 +29,15 @@ export class ExpensesController {
     @Req() request: AuthenticatedRequest,
   ) {
     return this.expensesService.findAll(walletId, request.user.userId);
+  }
+
+  @Post()
+  async create(
+    @Param('walletId') walletId: string,
+    @Req() request: AuthenticatedRequest,
+    @Body() dto: CreateExpenseDto,
+  ) {
+    return this.expensesService.create(walletId, request.user.userId, dto);
   }
 
   // TODO étape 2 : route POST (déclarer une dépense). Utilisez @Body() avec CreateExpenseDto.
