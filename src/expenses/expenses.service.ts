@@ -59,7 +59,10 @@ export class ExpensesService {
       select: expenseSelect,
     });
 
-    // Oubli étudiant : await this.prisma.wallet.update(...)
+    await this.prisma.wallet.update({
+      where: { id: walletId },
+      data: { updatedAt: new Date() },
+    });
 
     return toExpenseItem(expense);
   }

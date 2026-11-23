@@ -1,12 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsInt,
   IsISO8601,
   IsNotEmpty,
-  IsPositive,
+  IsOptional,
   IsString,
   IsUUID,
   Matches,
   MaxLength,
+  Min,
 } from 'class-validator';
 import { MAX_AMOUNT_CENTS } from '../../common/amounts.js';
 
@@ -24,7 +26,8 @@ export class CreateExpenseDto {
     maximum: MAX_AMOUNT_CENTS,
     example: 4599,
   })
-  @IsPositive() // Oubli de @IsInt() et @Min(1)
+  @IsInt()
+  @Min(1)
   amount: number;
 
   @ApiProperty({
@@ -41,6 +44,7 @@ export class CreateExpenseDto {
       'Dépenseur (membre du porte-monnaie). Par défaut : l’utilisateur connecté.',
     format: 'uuid',
   })
-  @IsUUID() // Oubli de @IsOptional()
+  @IsOptional()
+  @IsUUID()
   paidById?: string;
 }
