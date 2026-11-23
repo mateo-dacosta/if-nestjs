@@ -75,8 +75,23 @@ export class ExpensesService {
   //   4. mettre à jour wallet.updatedAt (règle métier : chaque action rafraîchit updatedAt)
   //   5. renvoyer toExpenseItem(...)
 
-  // TODO étape 3 : écrivez  async remove(walletId: string, expenseId: string)
-  //   (l'autorisation dépenseur/créateur est faite par ExpenseOwnerGuard, pas ici)
-  //   1. le porte-monnaie doit exister (NotFoundException) et être ouvert (assertWalletOpen)
-  //   2. supprimer la dépense, puis mettre à jour wallet.updatedAt
+  async remove(walletId: string, expenseId: string) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { id: walletId },
+      select: { status: true },
+    });
+    if (!wallet) {
+      throw new NotFoundException('Porte-monnaie introuvable.');
+    }
+    assertWalletOpen(wallet);
+
+    await this.prisma.expense.delete({
+      where: { id: expenseId },
+    });
+
+    await this.prisma.wallet.update({
+      where: { id: walletId },
+      data: { updatedAt: new Date() },
+    });
+  }
 }
