@@ -26,7 +26,7 @@ export class ExpensesService {
 
     return {
       items: expenses.map(toExpenseItem),
-      totalAmount: aggregate._sum.amount, // Oubli du ?? 0 au départ
+      totalAmount: aggregate._sum.amount ?? 0,
     };
   }
 
