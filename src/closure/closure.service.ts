@@ -3,12 +3,11 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  NotImplementedException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
-// TODO bonus : import { calculateBalances } from './balance-calculator.js';
-// TODO bonus : import { loadBalanceData } from './balance-data.js';
+import { calculateBalances } from './balance-calculator.js';
+import { loadBalanceData } from './balance-data.js';
 
 const closedWalletSelect = {
   id: true,
@@ -62,17 +61,19 @@ export class ClosureService {
     });
   }
 
-  // TODO bonus : écrivez getBalance(walletId, userId) - le bilan d'un porte-monnaie CLÔTURÉ.
-  //   1. await this.checkClosedWalletAccess(walletId, userId)   (fournie : 404 / 403 / 409)
-  //   2. const data = await loadBalanceData(this.prisma, walletId)   (fournie : lit la base)
-  //        → data.totalAmount : total des dépenses ; data.memberPayments : ce que chacun a payé
-  //   3. appeler calculateBalances(data.totalAmount, data.memberPayments)
-  //      (à écrire dans balance-calculator.ts)
-  //   4. renvoyer { walletId, totalAmount: data.totalAmount, balances, transfers }
-  //   N'oubliez pas d'ajouter « calculateBalances » et « loadBalanceData » aux imports
-  //   en haut du fichier, puis supprimez le « throw » ci-dessous.
-  async getBalance(_walletId: string, _userId: string): Promise<unknown> {
-    throw new NotImplementedException('TODO bonus : ClosureService.getBalance');
+  async getBalance(walletId: string, userId: string): Promise<unknown> {
+    // Erreur étudiant : oubli de await this.checkClosedWalletAccess(walletId, userId)
+    const data = await loadBalanceData(this.prisma, walletId);
+    const { balances, transfers } = calculateBalances(
+      data.totalAmount,
+      data.memberPayments,
+    );
+    return {
+      walletId,
+      totalAmount: data.totalAmount,
+      balances,
+      transfers,
+    };
   }
 
   private async checkClosedWalletAccess(walletId: string, userId: string) {
