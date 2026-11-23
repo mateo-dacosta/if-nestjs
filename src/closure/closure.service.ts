@@ -62,7 +62,7 @@ export class ClosureService {
   }
 
   async getBalance(walletId: string, userId: string): Promise<unknown> {
-    // Erreur étudiant : oubli de await this.checkClosedWalletAccess(walletId, userId)
+    await this.checkClosedWalletAccess(walletId, userId);
     const data = await loadBalanceData(this.prisma, walletId);
     const { balances, transfers } = calculateBalances(
       data.totalAmount,
